@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
+using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace api.Controllers
@@ -11,15 +12,17 @@ namespace api.Controllers
     [ApiController]
     public class StockController : ControllerBase
     {
-        private readonly ApplicationDBContext _context;
-        public StockController(ApplicationDBContext context)
+        private readonly ApplicationDBContext _context; // field to hold the database context, which will be injected via the constructor
+        public StockController(ApplicationDBContext context) // constructor that takes in the database context and assigns it to the field
         {
             _context = context;
         }
         [HttpGet] // GET: api/stock (get = read)
         public IActionResult GetAll()
         {
-            var stocks = _context.Stocks.ToList();
+            var stocks = _context.Stocks.ToList() //reference to table of stocks, then execute query to get stocks as a list
+             .Select(s => s.ToStockDTO()); // map to DTOs
+
             return Ok(stocks);
         }
 
@@ -32,7 +35,7 @@ namespace api.Controllers
             {
                 return NotFound();
             }
-            return Ok(stock);
+            return Ok(stock.ToStockDTO());
         }
     }
 }

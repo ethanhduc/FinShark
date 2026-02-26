@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using api.Models;
+using api.Models; // import the Stock and Comment models, which represent the database tables
 using Microsoft.EntityFrameworkCore;
 
 namespace api.Data

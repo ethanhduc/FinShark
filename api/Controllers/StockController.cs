@@ -40,7 +40,7 @@ namespace api.Controllers
         }
 
         [HttpPost] 
-        public IActionResult Create([FromBody] CreateStockRequestDTO stockDTO)
+        public IActionResult Create([FromBody] CreateStockRequestDTO stockDTO) //automatically deserialize JSON body into CreateStockRequestDTO object
         {
             var stockModel = stockDTO.ToStockFromCreateDTO(); // map from DTO to model
             _context.Stocks.Add(stockModel); // add to database context

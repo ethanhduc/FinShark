@@ -40,11 +40,11 @@ namespace api.Controllers
         }
 
         [HttpPost] 
-        public IActionResult Create([FromBody] CreateStockRequestDTO stockDTO) //automatically deserialize JSON body into CreateStockRequestDTO object
+        public IActionResult Create([FromBody] CreateStockRequestDTO createStockDTO) //automatically deserialize JSON body into CreateStockRequestDTO object
         {
-            var stockModel = stockDTO.ToStockFromCreateDTO(); // map from DTO to model
+            var stockModel = createStockDTO.ToStockFromCreateDTO(); // map from DTO to model
             _context.Stocks.Add(stockModel); // add to database context
-            _context.SaveChanges(); // save changes to database
+            _context.SaveChanges(); // save changes to database (id generated here)
             return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel.ToStockDTO()); // return 201 with location header pointing to new resource
         }
     }

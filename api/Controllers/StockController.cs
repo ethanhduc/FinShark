@@ -8,6 +8,7 @@ using api.Mappers;
 using api.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers
 {
@@ -21,18 +22,19 @@ namespace api.Controllers
             _context = context;
         }
         [HttpGet] // GET: api/stock (get = read)
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var stocks = _context.Stocks.ToList() //reference to table of stocks, then execute query to get stocks as a list
-             .Select(s => s.ToStockDTO()); // map to DTOs
+            var stocks = await _context.Stocks.ToListAsync(); //reference to table of stocks, then execute query to get stocks as a list
+             
+            var stockDTOs = stocks.Select(s => s.ToStockDTO()); // map to DTOs
 
-            return Ok(stocks);
+            return Ok(stockDTOs);
         }
 
         [HttpGet("{id}")]
-        public IActionResult GetById([FromRoute] int id)
+        public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var stock = _context.Stocks.Find(id);
+            var stock = await _context.Stocks.FindAsync(id);
 
             if(stock == null)
             {
@@ -42,19 +44,22 @@ namespace api.Controllers
         }
 
         [HttpPost] 
-        public IActionResult Create([FromBody] CreateStockRequestDTO createStockDTO) //automatically deserialize JSON body into CreateStockRequestDTO object
+        public async Task<IActionResult> Create([FromBody] CreateStockRequestDTO createStockDTO) //automatically deserialize JSON body into CreateStockRequestDTO object
         {
             var stockModel = createStockDTO.ToStockFromCreateDTO(); // map from DTO to model
-            _context.Stocks.Add(stockModel); // add to database context
-            _context.SaveChanges(); // save changes to database (id generated here)
+
+            await _context.Stocks.AddAsync(stockModel); // add to database context
+
+            await _context.SaveChangesAsync(); // save changes to database (id generated here)
+
             return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel.ToStockDTO()); // return 201 with location header pointing to new resource
         }
 
         [HttpPut]
         [Route("{id}")]
-        public IActionResult Update([FromRoute] int id, [FromBody] UpdateStockRequestDTO updateDTO)
+        public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDTO updateDTO)
         {
-            var stockModel = _context.Stocks.FirstOrDefault(x => x.Id == id); // find stock by id
+            var stockModel = await _context.Stocks.FirstOrDefaultAsync(x => x.Id == id); // find stock by id
 
             if(stockModel == null)
             {
@@ -68,25 +73,25 @@ namespace api.Controllers
             stockModel.Industry = updateDTO.Industry;
             stockModel.MarketCap = updateDTO.MarketCap;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return Ok(stockModel.ToStockDTO());
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public IActionResult Delete([FromRoute] int id)
+        public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var stockModel = _context.Stocks.FirstOrDefault(x => x.Id == id); // find stock by id
+            var stockModel = await _context.Stocks.FirstOrDefaultAsync(x => x.Id == id); // find stock by id
 
             if(stockModel == null)
             {
                 return NotFound();
             }
 
-            _context.Stocks.Remove(stockModel);
+            _context.Stocks.Remove(stockModel); //not an async operation because we're just marking the entity for deletion in the context, not actually hitting the database yet
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }

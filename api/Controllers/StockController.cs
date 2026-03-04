@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.DTOs.Stock;
+using api.Interfaces;
 using api.Mappers;
 using api.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -17,14 +18,18 @@ namespace api.Controllers
     public class StockController : ControllerBase
     {
         private readonly ApplicationDBContext _context; // field to hold the database context, which will be injected via the constructor
-        public StockController(ApplicationDBContext context) // constructor that takes in the database context and assigns it to the field
+        private readonly IStockRepository _stockRepo; // field to hold the stock repository, which will be injected via the constructor
+        
+        public StockController(ApplicationDBContext context, IStockRepository stockRepo) // constructor that takes in the database context and assigns it to the field
         {
+            _stockRepo = stockRepo;
             _context = context;
         }
-        [HttpGet] // GET: api/stock (get = read)
+
+        [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            var stocks = await _context.Stocks.ToListAsync(); //reference to table of stocks, then execute query to get stocks as a list
+            var stocks = await _stockRepo.GetAllAsync(); // get all stocks from the repository
              
             var stockDTOs = stocks.Select(s => s.ToStockDTO()); // map to DTOs
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using api.Interfaces;
+using api.Mappers;
 using api.Repository;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,6 +17,16 @@ namespace api.Controllers
         public CommentController(ICommentRepository commentRepo)
         {
             _commentRepo = commentRepo;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var comments = await _commentRepo.GetAllAsync();
+
+            var commentDTO = comments.Select(s => s.ToCommentDTO());
+
+            return Ok(commentDTO);
         }
     }
 }

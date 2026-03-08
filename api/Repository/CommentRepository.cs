@@ -18,6 +18,7 @@ namespace api.Repository
         {
             _context = context;
         }
+        
         public async Task<List<Comment>> GetAllAsync()
         {
             return await _context.Comments.ToListAsync(); 
